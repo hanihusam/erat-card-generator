@@ -16,6 +16,17 @@ model Category {
   name        String   @unique
 
   contents    Content[]
+  subCategories SubCategory[]
+}
+
+model SubCategory {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  name        String   @unique
+
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
 }
 
 model Content {
@@ -24,6 +35,6 @@ model Content {
   content     String
   
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
