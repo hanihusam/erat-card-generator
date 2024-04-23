@@ -1,7 +1,7 @@
 import {Links, Meta, Outlet, Scripts, ScrollRestoration} from '@remix-run/react'
 import type {LinksFunction} from '@remix-run/node'
 
-import tailwindStyles from './styles/tailwind.css'
+import tailwindStyles from '~/styles/tailwind.css'
 
 export const links: LinksFunction = () => [
   {rel: 'stylesheet', href: tailwindStyles},
