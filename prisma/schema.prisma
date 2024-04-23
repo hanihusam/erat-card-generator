@@ -15,7 +15,7 @@ model Category {
   createdAt     DateTime @default(now())
   name          String   @unique
 
-  contents      Content[]
+  content       Content[]
   subCategory   SubCategory[]
 }
 
@@ -23,22 +23,20 @@ model SubCategory {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
   name        String   @unique
+  categoryName  String
 
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  
-  contents    Content[]
-
+  category    Category? @relation(fields: [categoryName], references: [name], onDelete: Cascade)
+  content     Content[]
 }
 
 model Content {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  content       String   @unique
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  content             String   @unique
+  contentCategory     String
+  contentSubCategory  String
   
-  categoryId    Int?
-  subCategoryId Int?
-  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategory         SubCategory? @relation(fields: [contentSubCategory], references: [name], onDelete: Cascade)
+  category            Category? @relation(fields: [contentCategory], references: [name], onDelete: Cascade)
 }
 

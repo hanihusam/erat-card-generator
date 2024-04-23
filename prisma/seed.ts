@@ -3,8 +3,8 @@ import initData from './data/init_content.json'
 
 type InitData = {
   content: string
-  category: string
-  subCategory: string
+  contentCategory: string
+  contentSubCategory: string
 }
 
 const db = new PrismaClient()
@@ -12,31 +12,30 @@ const db = new PrismaClient()
 async function seed() {
   const data = initData as InitData[]
 
-  for (const {content, category, subCategory} of data) {
+  for (const {content, contentCategory, contentSubCategory} of data) {
+    await db.category.upsert({
+      where: {name: contentCategory},
+      create: {
+        name: contentCategory,
+      },
+      update: {},
+    })
+
+    await db.subCategory.upsert({
+      where: {name: contentSubCategory},
+      create: {
+        name: contentSubCategory,
+        categoryName: contentCategory,
+      },
+      update: {},
+    })
+
     await db.content.upsert({
       where: {content},
       create: {
         content,
-        category: {
-          connectOrCreate: {
-            where: {name: category},
-            create: {name: category},
-          },
-        },
-        subCategory: {
-          connectOrCreate: {
-            where: {name: subCategory},
-            create: {
-              name: subCategory,
-              category: {
-                connectOrCreate: {
-                  where: {name: category},
-                  create: {name: category},
-                },
-              },
-            },
-          },
-        },
+        contentCategory,
+        contentSubCategory,
       },
       update: {},
     })
