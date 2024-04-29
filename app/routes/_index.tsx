@@ -1,15 +1,7 @@
 import type {MetaFunction} from '@remix-run/node'
+import {json, useActionData} from '@remix-run/react'
+
 import {db} from '~/utils/db.server'
-import {json} from '@remix-run/node'
-import {useLoaderData} from '@remix-run/react'
-
-export async function loader() {
-  const data = await db.content.findMany()
-
-  return json({
-    contents: data,
-  })
-}
 
 export const meta: MetaFunction = () => {
   return [
@@ -18,8 +10,21 @@ export const meta: MetaFunction = () => {
   ]
 }
 
+export async function action() {
+  const count = await db.content.count()
+  const randomRowNumber = Math.floor(Math.random() * count)
+  const [data] = await db.content.findMany({
+    skip: randomRowNumber,
+    take: 1,
+  })
+
+  return json({
+    data,
+  })
+}
+
 export default function Index() {
-  const data = useLoaderData<typeof loader>()
+  const actionData = useActionData<typeof action>()
 
   return (
     <>
@@ -27,30 +32,19 @@ export default function Index() {
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="relative isolate overflow-hidden bg-gray-900 px-6 py-24 shadow-2xl sm:rounded-3xl sm:px-24 xl:py-32">
             <h2 className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Welcome!
+              Generate to get your card!
             </h2>
-            <p className="mx-auto mt-2 max-w-xl text-center text-lg leading-8 text-gray-300">
-              Reprehenderit ad esse et non officia in nulla. Id proident tempor
-              incididunt nostrud nulla et culpa.
-            </p>
-            <form className="mx-auto mt-10 flex max-w-md gap-x-4">
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-white sm:text-sm sm:leading-6"
-                placeholder="Enter your email"
-              />
+            {actionData ? (
+              <p className="mx-auto mt-2 max-w-xl text-center text-lg leading-8 text-gray-300">
+                {actionData.data.content}
+              </p>
+            ) : null}
+            <form method="post" className="mx-auto mt-10 flex text-center">
               <button
                 type="submit"
-                className="flex-none rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="rounded-md mx-auto bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Notify me
+                Generate
               </button>
             </form>
             <svg
@@ -82,13 +76,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-      {data.contents.map(item => (
-        <div key={item.id}>
-          <h1>{item.content}</h1>
-          <h2>{item.contentCategory}</h2>
-          <h3>{item.contentSubCategory}</h3>
-        </div>
-      ))}
     </>
   )
 }
