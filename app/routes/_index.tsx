@@ -1,5 +1,5 @@
 import type {MetaFunction} from '@remix-run/node'
-import {json, useActionData, Form} from '@remix-run/react'
+import {json, useFetcher} from '@remix-run/react'
 
 import {db} from '~/utils/db.server'
 
@@ -24,7 +24,8 @@ export async function action() {
 }
 
 export default function Index() {
-  const data = useActionData<typeof action>()
+  const fetcher = useFetcher<typeof action>()
+  const isGenerating = fetcher.state !== 'idle'
 
   return (
     <>
@@ -34,19 +35,23 @@ export default function Index() {
             <h2 className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Generate to get your card!
             </h2>
-            {data ? (
+            {fetcher.data ? (
               <p className="mx-auto mt-2 max-w-xl text-center text-lg leading-8 text-gray-300">
-                {data.res.content}
+                {fetcher.data.res.content}
               </p>
             ) : null}
-            <Form method="post" className="mx-auto mt-10 flex text-center">
+            <fetcher.Form
+              method="post"
+              className="mx-auto mt-10 flex text-center"
+            >
               <button
                 type="submit"
+                disabled={isGenerating}
                 className="rounded-md mx-auto bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Generate
               </button>
-            </Form>
+            </fetcher.Form>
             <svg
               viewBox="0 0 1024 1024"
               className="absolute left-1/2 top-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2"
