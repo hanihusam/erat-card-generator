@@ -10,23 +10,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                String   @id @default(uuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  email             String   @unique
+  passwordHash      String
+  
+  contents           Content[]
+}
+
 model Category {
-  id            Int      @id @default(autoincrement())
-  createdAt     DateTime @default(now())
-  name          String   @unique
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  name          String      @unique
 
   content       Content[]
   subCategory   SubCategory[]
 }
 
 model SubCategory {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  name        String   @unique
+  id            String      @id @default(uuid())
+  createdAt     DateTime    @default(now())
+  name          String      @unique
   categoryName  String
 
-  category    Category? @relation(fields: [categoryName], references: [name], onDelete: Cascade)
-  content     Content[]
+  category      Category?   @relation(fields: [categoryName], references: [name], onDelete: Cascade)
+  content       Content[]
 }
 
 model Content {
@@ -35,7 +45,9 @@ model Content {
   content             String   @unique
   contentCategory     String
   contentSubCategory  String
-  
+  userId              String
+
+  user                User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   subCategory         SubCategory? @relation(fields: [contentSubCategory], references: [name], onDelete: Cascade)
   category            Category? @relation(fields: [contentCategory], references: [name], onDelete: Cascade)
 }
